@@ -105,4 +105,4 @@ function StatBox({ label, value, highlighted = false }: { label: string, value: 
       <span className={`text-2xl font-black ${highlighted ? 'text-blue-700' : 'text-gray-800'}`}>{value}</span>
     </div>
   );
-}
+} 
