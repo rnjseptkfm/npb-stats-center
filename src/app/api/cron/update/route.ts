@@ -1,3 +1,5 @@
+export const dynamic = "force - dynamics";
+
 import { fullUpdate, updatePlayerStats } from '@/lib/scraper';
 import { prisma } from '@/lib/db';
 import { NextResponse } from 'next/server';
