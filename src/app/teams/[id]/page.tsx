@@ -1,10 +1,12 @@
 import Link from 'next/link';
 
 async function getTeam(id: string) {
-  const res = await fetch(`/api/teams/${id}`); { cache: 'no-store' };
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || '';
+  const res = await fetch(`${baseUrl}/api/teams/${id}`, { cache: 'no-store' });
   if (!res.ok) return null;
   return res.json();
 }
+
 
 export default async function TeamPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

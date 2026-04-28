@@ -1,7 +1,8 @@
 import Link from 'next/link';
 
 async function getStandings() {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/standings`, { cache: 'no-store' });
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || '';
+  const res = await fetch(`${baseUrl}/api/standings`, { cache: 'no-store' });
   if (!res.ok) return { central: [], pacific: [] };
   return res.json();
 }
