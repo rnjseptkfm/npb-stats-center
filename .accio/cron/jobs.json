@@ -1,0 +1,34 @@
+{
+  "version": 2,
+  "jobs": [
+    {
+      "id": "cron-1777388085493-91sckgub",
+      "name": "Daily NPB Data Update",
+      "enabled": true,
+      "deleteAfterRun": false,
+      "createdAtMs": 1777388085493,
+      "updatedAtMs": 1777388085493,
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 6 * * *"
+      },
+      "payload": {
+        "kind": "command",
+        "command": "npx tsx scripts/daily-update.ts"
+      },
+      "state": {
+        "nextRunAtMs": 1777410000000
+      },
+      "target": {
+        "type": "conversation",
+        "conversationId": "CID-09997612U1777383-EF5DF8-3988-EA89EC"
+      },
+      "workspacePath": "C:\\Users\\SAMSUNG\\.accio\\accounts\\7086997612\\agents\\DID-DB9653-68DB9653U1777382-1945-05A81A\\project",
+      "createdBy": {
+        "source": "agent",
+        "actorId": "DID-DB9653-68DB9653U1777382-1945-05A81A"
+      },
+      "sessionTarget": "main"
+    }
+  ]
+}

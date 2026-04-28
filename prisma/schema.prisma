@@ -1,0 +1,104 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Team {
+  id        String     @id @default(cuid())
+  name      String     @unique
+  fullName  String
+  league    String     // "Central" or "Pacific"
+  logoUrl   String?
+  standing  Standing?
+  players   Player[]
+  updatedAt DateTime   @updatedAt
+}
+
+model Standing {
+  id        String   @id @default(cuid())
+  teamId    String   @unique
+  team      Team     @relation(fields: [teamId], references: [id])
+  rank      Int
+  played    Int
+  wins      Int
+  losses    Int
+  draws     Int
+  winRate   Float
+  gamesBehind Float
+  updatedAt DateTime @updatedAt
+}
+
+model Player {
+  id            String         @id @default(cuid())
+  externalId    String?        @unique // ID from source (e.g. Yahoo)
+  name          String
+  nameKanji     String?
+  teamId        String
+  team          Team           @relation(fields: [teamId], references: [id])
+  number        String?
+  position      String?        // "Pitcher", "Catcher", "Infielder", "Outfielder"
+  bats          String?        // "Right", "Left", "Both"
+  throws        String?        // "Right", "Left"
+  height        Int?           // cm
+  weight        Int?           // kg
+  birthday      String?
+  imageUrl      String?
+  battingStats  BattingStats[]
+  pitchingStats PitchingStats[]
+  updatedAt     DateTime       @updatedAt
+}
+
+model BattingStats {
+  id        String   @id @default(cuid())
+  playerId  String
+  player    Player   @relation(fields: [playerId], references: [id])
+  year      Int
+  games     Int
+  pa        Int      // Plate Appearances
+  ab        Int      // At Bats
+  hits      Int
+  runs      Int
+  doubles   Int?
+  triples   Int?
+  hr        Int      // Home Runs
+  rbi       Int
+  steals    Int
+  walks     Int
+  so        Int      // Strikeouts
+  avg       Float    // Average
+  obp       Float?   // On Base Percentage
+  slg       Float?   // Slugging Percentage
+  ops       Float?
+  updatedAt DateTime @updatedAt
+
+  @@unique([playerId, year])
+}
+
+model PitchingStats {
+  id        String   @id @default(cuid())
+  playerId  String
+  player    Player   @relation(fields: [playerId], references: [id])
+  year      Int
+  games     Int
+  wins      Int
+  losses    Int
+  saves     Int
+  holds     Int
+  ip        Float    // Innings Pitched
+  hits      Int
+  hr        Int
+  walks     Int
+  so        Int
+  era       Float
+  whip      Float?
+  updatedAt DateTime @updatedAt
+
+  @@unique([playerId, year])
+}
