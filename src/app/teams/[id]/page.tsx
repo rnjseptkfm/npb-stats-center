@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
 async function getTeam(id: string) {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/teams/${id}`, { cache: 'no-store' });
+  const res = await fetch(`/api/teams/${id}`); { cache: 'no-store' };
   if (!res.ok) return null;
   return res.json();
 }
