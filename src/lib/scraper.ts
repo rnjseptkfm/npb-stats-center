@@ -165,6 +165,8 @@ export async function updatePlayersForTeam(yahooTeamId: number) {
   return Array.from(playerIds);
 }
 
+import { translateNameToKorean } from './translator';
+
 export async function updatePlayerStats(externalId: string) {
   const url = `https://baseball.yahoo.co.jp/npb/player/${externalId}/`;
   const { data } = await axios.get(url);
@@ -173,8 +175,22 @@ export async function updatePlayerStats(externalId: string) {
   const player = await prisma.player.findUnique({ where: { externalId } });
   if (!player) return;
 
-  const currentYear = new Date().getFullYear();
+  // Update name to Korean if not already done or just update it
+  const titleText = $('.bb-profile__name').text().trim(); // e.g. "田中 将大 （タナカ マサヒロ）"
+  const kanaMatch = titleText.match(/（(.+)）/);
+  if (kanaMatch) {
+    const kanaName = kanaMatch[1];
+    const koreanName = translateNameToKorean(kanaName);
+    await prisma.player.update({
+      where: { id: player.id },
+      data: { 
+        name: koreanName,
+        nameKanji: titleText.split('（')[0].trim()
+      }
+    });
+  }
   const isPitcher = player.position === '投手';
+  const currentYear = new Date().getFullYear();
 
   const statsTables = $('.bb-playerStatsTable');
   if (statsTables.length === 0) return;
