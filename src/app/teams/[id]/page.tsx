@@ -1,8 +1,7 @@
 import Link from 'next/link';
 
 async function getTeam(id: string) {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || '';
-  const res = await fetch(`${baseUrl}/api/teams/${id}`, { cache: 'no-store' });
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://' + process.env.VERCEL_URL}/api/teams/${id}`, { cache: 'no-store' });
   if (!res.ok) return null;
   return res.json();
 }

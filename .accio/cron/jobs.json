@@ -7,7 +7,7 @@
       "enabled": true,
       "deleteAfterRun": false,
       "createdAtMs": 1777388085493,
-      "updatedAtMs": 1777388085493,
+      "updatedAtMs": 1777410019194,
       "schedule": {
         "kind": "cron",
         "expr": "0 6 * * *"
@@ -17,7 +17,10 @@
         "command": "npx tsx scripts/daily-update.ts"
       },
       "state": {
-        "nextRunAtMs": 1777410000000
+        "nextRunAtMs": 1777496400000,
+        "lastRunAtMs": 1777410019034,
+        "lastStatus": "ok",
+        "lastDurationMs": 18569
       },
       "target": {
         "type": "conversation",
