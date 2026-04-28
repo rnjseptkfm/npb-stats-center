@@ -1,4 +1,4 @@
-export const dynamic = "force - dynamics";
+export const dynamic = "force-dynamic";
 
 import { fullUpdate, updatePlayerStats } from '@/lib/scraper';
 import { prisma } from '@/lib/db';
