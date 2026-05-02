@@ -1,9 +1,21 @@
+import { prisma } from '@/lib/db';
 import Link from 'next/link';
 
 async function getStandings() {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://' + process.env.VERCEL_URL}/api/standings`, { cache: 'no-store' });
-  if (!res.ok) return { central: [], pacific: [] };
-  return res.json();
+  const standings = await prisma.standing.findMany({
+    include: {
+      team: true,
+    },
+    orderBy: [
+      { team: { league: 'asc' } },
+      { rank: 'asc' },
+    ],
+  });
+
+  const central = standings.filter((s) => s.team.league === 'Central');
+  const pacific = standings.filter((s) => s.team.league === 'Pacific');
+
+  return { central, pacific };
 }
 
 export default async function Home() {

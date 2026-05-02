@@ -1,9 +1,21 @@
+import { prisma } from '@/lib/db';
 import Link from 'next/link';
 
 async function getPlayer(id: string) {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://' + process.env.VERCEL_URL}/api/players/${id}`, { cache: 'no-store' });
-  if (!res.ok) return null;
-  return res.json();
+  return await prisma.player.findUnique({
+    where: { id },
+    include: {
+      team: true,
+      battingStats: {
+        orderBy: { updatedAt: 'desc' },
+        take: 1,
+      },
+      pitchingStats: {
+        orderBy: { updatedAt: 'desc' },
+        take: 1,
+      },
+    },
+  });
 }
 
 export default async function PlayerPage({ params }: { params: Promise<{ id: string }> }) {

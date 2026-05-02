@@ -1,11 +1,17 @@
+import { prisma } from '@/lib/db';
 import Link from 'next/link';
 
 async function getTeam(id: string) {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://' + process.env.VERCEL_URL}/api/teams/${id}`, { cache: 'no-store' });
-  if (!res.ok) return null;
-  return res.json();
+  return await prisma.team.findUnique({
+    where: { id },
+    include: {
+      standing: true,
+      players: {
+        orderBy: { number: 'asc' },
+      },
+    },
+  });
 }
-
 
 export default async function TeamPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
