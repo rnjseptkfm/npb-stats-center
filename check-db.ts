@@ -1,11 +1,17 @@
-import { PrismaClient } from '@prisma/client';
+const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 async function check() {
-  const standings = await prisma.standing.findMany({
-    include: { team: true }
+  const teams = await prisma.team.findMany({
+    include: { standing: true }
   });
-  console.log(JSON.stringify(standings, null, 2));
+  console.log('Teams and Standings:');
+  teams.forEach(t => {
+    console.log(`${t.fullName} (${t.league}): Rank ${t.standing?.rank}, Wins ${t.standing?.wins}`);
+  });
+
+  const playerCount = await prisma.player.count();
+  console.log(`Total players: ${playerCount}`);
 }
 
-check().catch(console.error);
+check().catch(console.error).finally(() => prisma.$disconnect());

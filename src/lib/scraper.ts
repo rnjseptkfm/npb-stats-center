@@ -40,56 +40,57 @@ export async function updateStandings() {
   const { data } = await axios.get(url);
   const $ = cheerio.load(data);
 
-  const tables = $('.bb-rankTable'); // This might need verification
-  // Based on web_fetch output, it's a table with specific columns.
-  
   const standingRows: any[] = [];
 
-  $('table.bb-rankTable tbody tr').each((_, el) => {
-    const cells = $(el).find('td');
-    if (cells.length < 5) return;
+  // Specifically target the regular season tables
+  // These are usually the first two tables with class .bb-rankTable
+  // Or we can find them by the headers
+  $('h2').each((_, header) => {
+    const title = $(header).text().trim();
+    // Only pick "Central League" or "Pacific League", exclude "Open Game" (Preseason)
+    if (title === 'セ・リーグ' || title === 'パ・リーグ') {
+      const table = $(header).nextAll('.bb-rankTable').first();
+      
+      table.find('tbody tr').each((_, el) => {
+        const cells = $(el).find('td');
+        if (cells.length < 8) return;
 
-    const rank = parseInt($(cells[0]).text().trim());
-    const teamNameJapanese = $(cells[1]).find('a').text().trim() || $(cells[1]).text().trim();
-    const played = parseInt($(cells[2]).text().trim());
-    const wins = parseInt($(cells[3]).text().trim());
-    const losses = parseInt($(cells[4]).text().trim());
-    const draws = parseInt($(cells[5]).text().trim());
-    const winRate = parseFloat($(cells[6]).text().trim());
-    const gamesBehindText = $(cells[7]).text().trim();
-    const gamesBehind = gamesBehindText === '-' ? 0 : parseFloat(gamesBehindText);
+        const rank = parseInt($(cells[0]).text().trim());
+        const teamNameJapanese = $(cells[1]).find('a').text().trim() || $(cells[1]).text().trim();
+        const played = parseInt($(cells[2]).text().trim());
+        const wins = parseInt($(cells[3]).text().trim());
+        const losses = parseInt($(cells[4]).text().trim());
+        const draws = parseInt($(cells[5]).text().trim());
+        const winRate = parseFloat($(cells[6]).text().trim());
+        const gamesBehindText = $(cells[7]).text().trim();
+        const gamesBehind = gamesBehindText === '-' ? 0 : parseFloat(gamesBehindText);
 
-    const teamName = TEAM_NAME_MAP[teamNameJapanese];
-    if (teamName) {
-      standingRows.push({
-        teamName,
-        rank,
-        played,
-        wins,
-        losses,
-        draws,
-        winRate,
-        gamesBehind,
+        const teamName = TEAM_NAME_MAP[teamNameJapanese];
+        if (teamName) {
+          standingRows.push({
+            teamName,
+            rank,
+            played,
+            wins,
+            losses,
+            draws,
+            winRate,
+            gamesBehind,
+          });
+        }
       });
     }
   });
 
+  // Clear and update
+  await prisma.standing.deleteMany({});
+  
   for (const row of standingRows) {
     const team = await prisma.team.findUnique({ where: { name: row.teamName } });
     if (!team) continue;
 
-    await prisma.standing.upsert({
-      where: { teamId: team.id },
-      update: {
-        rank: row.rank,
-        played: row.played,
-        wins: row.wins,
-        losses: row.losses,
-        draws: row.draws,
-        winRate: row.winRate,
-        gamesBehind: row.gamesBehind,
-      },
-      create: {
+    await prisma.standing.create({
+      data: {
         teamId: team.id,
         rank: row.rank,
         played: row.played,
@@ -118,47 +119,54 @@ export async function updatePlayersForTeam(yahooTeamId: number) {
 
   for (const type of types) {
     const url = `https://baseball.yahoo.co.jp/npb/teams/${yahooTeamId}/${type}`;
-    const { data } = await axios.get(url);
-    const $ = cheerio.load(data);
+    try {
+      const { data } = await axios.get(url);
+      const $ = cheerio.load(data);
 
-    $('.bb-playerTable__row').each((_, el) => {
-      const row = $(el);
-      if (row.hasClass('bb-playerTable__row--head')) return;
+      // Support multiple table structures as Yahoo often changes them
+      const playerRows = $('.bb-playerTable__row, .bb-table__row');
+      
+      playerRows.each((_, el) => {
+        const row = $(el);
+        if (row.hasClass('bb-playerTable__row--head') || row.hasClass('bb-table__row--head')) return;
 
-      const cells = row.find('td');
-      if (cells.length < 2) return;
+        const cells = row.find('td');
+        if (cells.length < 2) return;
 
-      const number = $(cells[0]).text().trim();
-      const nameLink = $(cells[1]).find('a');
-      const name = nameLink.text().trim();
-      const href = nameLink.attr('href') || '';
-      // href is like /npb/player/12345/top
-      const externalIdMatch = href.match(/\/npb\/player\/([0-9]+)/);
-      const externalId = externalIdMatch ? externalIdMatch[1] : null;
+        const number = $(cells[0]).text().trim();
+        const nameLink = $(cells[1]).find('a');
+        const nameJapanese = nameLink.text().trim();
+        const href = nameLink.attr('href') || '';
+        
+        const externalIdMatch = href.match(/\/npb\/player\/([0-9]+)/);
+        const externalId = externalIdMatch ? externalIdMatch[1] : null;
 
-      if (externalId && name) {
-        playerIds.add(externalId);
-        // Position isn't always in this table, but we can set it later or infer from 'type'
-        const position = type === 'pitchingstats' ? '投手' : '野手';
+        if (externalId && nameJapanese) {
+          playerIds.add(externalId);
+          const position = type === 'pitchingstats' ? '投手' : '野手';
 
-        prisma.player.upsert({
-          where: { externalId },
-          update: {
-            name,
-            number,
-            position,
-            teamId: team.id,
-          },
-          create: {
-            externalId,
-            name,
-            number,
-            position,
-            teamId: team.id,
-          },
-        }).catch(e => console.error(`Failed to upsert player ${name}:`, e));
-      }
-    });
+          // Ensure name is translated to Korean before saving
+          // We'll get the kana in updatePlayerStats, but let's do a basic translation if possible or just use Japanese for now until detail update
+          prisma.player.upsert({
+            where: { externalId },
+            update: {
+              number,
+              position,
+              teamId: team.id,
+            },
+            create: {
+              externalId,
+              name: nameJapanese,
+              number,
+              position,
+              teamId: team.id,
+            },
+          }).catch(e => console.error(`Failed to upsert player ${nameJapanese}:`, e));
+        }
+      });
+    } catch (error: any) {
+      console.warn(`Could not fetch ${type} for team ${yahooTeamId}: ${error.message}`);
+    }
   }
   
   console.log(`Found ${playerIds.size} unique players for ${teamName}.`);
