@@ -7,17 +7,31 @@ const prisma = new PrismaClient();
 const TEAM_NAME_MAP: Record<string, string> = {
   '巨人': 'Giants',
   '阪神': 'Tigers',
-  '中日': 'Dragons',
-  'DeNA': 'BayStars',
+  'ＤｅＮＡ': 'BayStars',
   '広島': 'Carp',
   'ヤクルト': 'Swallows',
+  '中日': 'Dragons',
   'ソフトバンク': 'Hawks',
-  'ロッテ': 'Marines',
-  '西武': 'Lions',
-  '楽天': 'Eagles',
   '日本ハム': 'Fighters',
+  'ロッテ': 'Marines',
+  '楽天': 'Eagles',
   'オリックス': 'Buffaloes',
+  '西武': 'Lions',
+  // Variants
+  '読売ジャイアンツ': 'Giants',
+  '阪神タイガース': 'Tigers',
+  '横浜DeNAベイスターズ': 'BayStars',
+  '広島東洋カープ': 'Carp',
+  '東京ヤクルトスワローズ': 'Swallows',
+  '中日ドラゴンズ': 'Dragons',
+  '福岡ソフトバンクホークス': 'Hawks',
+  '北海道日本ハムファイターズ': 'Fighters',
+  '千葉ロッテマリーンズ': 'Marines',
+  '東北楽天ゴールデンイーグルス': 'Eagles',
+  'オリックス・バファローズ': 'Buffaloes',
+  '埼玉西武ライオンズ': 'Lions',
 };
+
 
 const TEAM_ID_MAP: Record<number, string> = {
   1: 'Giants',
