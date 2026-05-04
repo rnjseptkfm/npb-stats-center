@@ -7,13 +7,12 @@ async function getStandings() {
       team: true,
     },
     orderBy: [
-      { team: { league: 'asc' } },
       { rank: 'asc' },
     ],
   });
 
-  const central = standings.filter((s) => s.team.league === 'Central');
-  const pacific = standings.filter((s) => s.team.league === 'Pacific');
+  const central = standings.filter((s: any) => s.team?.league === 'Central');
+  const pacific = standings.filter((s: any) => s.team?.league === 'Pacific');
 
   return { central, pacific };
 }

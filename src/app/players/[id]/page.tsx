@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/db';
 import Link from 'next/link';
 
-async function getPlayer(id: string) {
+async function getPlayer(id: string): Promise<any> {
   return await prisma.player.findUnique({
     where: { id },
     include: {
@@ -75,17 +75,17 @@ function PitchingStatsTable({ stats }: { stats: any }) {
   
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-px bg-gray-200">
-      <StatBox label="방어율" value={stats.era.toFixed(2)} highlighted />
-      <StatBox label="경기" value={stats.games} />
-      <StatBox label="승리" value={stats.wins} />
-      <StatBox label="패전" value={stats.losses} />
-      <StatBox label="세이브" value={stats.saves} />
-      <StatBox label="홀드" value={stats.holds} />
-      <StatBox label="이닝" value={stats.ip.toFixed(1)} />
-      <StatBox label="탈삼진" value={stats.so} />
-      <StatBox label="피안타" value={stats.hits} />
-      <StatBox label="피홈런" value={stats.hr} />
-      <StatBox label="볼넷" value={stats.walks} />
+      <StatBox label="방어율" value={(stats.era || 0).toFixed(2)} highlighted />
+      <StatBox label="경기" value={stats.games || 0} />
+      <StatBox label="승리" value={stats.wins || 0} />
+      <StatBox label="패전" value={stats.losses || 0} />
+      <StatBox label="세이브" value={stats.saves || 0} />
+      <StatBox label="홀드" value={stats.holds || 0} />
+      <StatBox label="이닝" value={(stats.ip || 0).toFixed(1)} />
+      <StatBox label="탈삼진" value={stats.so || 0} />
+      <StatBox label="피안타" value={stats.hits || 0} />
+      <StatBox label="피홈런" value={stats.hr || 0} />
+      <StatBox label="볼넷" value={stats.walks || 0} />
     </div>
   );
 }
@@ -95,17 +95,17 @@ function BattingStatsTable({ stats }: { stats: any }) {
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-px bg-gray-200">
-      <StatBox label="타율" value={stats.avg.toFixed(3)} highlighted />
-      <StatBox label="경기" value={stats.games} />
-      <StatBox label="타석" value={stats.pa} />
-      <StatBox label="안타" value={stats.hits} />
-      <StatBox label="홈런" value={stats.hr} />
-      <StatBox label="타점" value={stats.rbi} />
-      <StatBox label="득점" value={stats.runs} />
-      <StatBox label="도루" value={stats.steals} />
-      <StatBox label="볼넷" value={stats.walks} />
-      <StatBox label="삼진" value={stats.so} />
-      <StatBox label="OPS" value={stats.ops.toFixed(3)} highlighted />
+      <StatBox label="타율" value={(stats.avg || 0).toFixed(3)} highlighted />
+      <StatBox label="경기" value={stats.games || 0} />
+      <StatBox label="타석" value={stats.pa || 0} />
+      <StatBox label="안타" value={stats.hits || 0} />
+      <StatBox label="홈런" value={stats.hr || 0} />
+      <StatBox label="타점" value={stats.rbi || 0} />
+      <StatBox label="득점" value={stats.runs || 0} />
+      <StatBox label="도루" value={stats.steals || 0} />
+      <StatBox label="볼넷" value={stats.walks || 0} />
+      <StatBox label="삼진" value={stats.so || 0} />
+      <StatBox label="OPS" value={(stats.ops || 0).toFixed(3)} highlighted />
     </div>
   );
 }

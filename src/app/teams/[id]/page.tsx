@@ -1,27 +1,7 @@
 import { prisma } from '@/lib/db';
 import Link from 'next/link';
 
-interface Player {
-  id: string;
-  name: string;
-  number: string;
-  position: string;
-}
-
-interface TeamWithPlayers {
-  id: string;
-  fullName: string;
-  league: string;
-  standing: {
-    rank: number;
-    wins: number;
-    losses: number;
-    draws: number;
-  } | null;
-  players: Player[];
-}
-
-async function getTeam(id: string): Promise<TeamWithPlayers | null> {
+async function getTeam(id: string): Promise<any> {
   const team = await prisma.team.findUnique({
     where: { id },
     include: {
@@ -32,17 +12,13 @@ async function getTeam(id: string): Promise<TeamWithPlayers | null> {
 
   if (!team) return null;
 
-  // Manual sorting to avoid type issues with Prisma's auto-generated types in some Next.js versions
-  const sortedPlayers = [...team.players].sort((a, b) => {
+  const players = [...team.players].sort((a: any, b: any) => {
     const numA = parseInt(a.number) || 999;
     const numB = parseInt(b.number) || 999;
     return numA - numB;
   });
 
-  return {
-    ...team,
-    players: sortedPlayers
-  } as TeamWithPlayers;
+  return { ...team, players };
 }
 
 export default async function TeamPage({ params }: { params: Promise<{ id: string }> }) {
